@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Coin Comrade</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body">
+
+    <div class="auth-split">
+
+        <div class="auth-panel-left">
+            <div class="auth-panel-inner">
+                <div class="auth-logo">Coin Comrade</div>
+                <p class="auth-tagline">Track your spending.<br>Reach your goals.</p>
+                <ul class="auth-features">
+                    <li>Spending dashboard &amp; trends</li>
+                    <li>Savings goal tracker</li>
+                    <li>Recurring transaction manager</li>
+                    <li>Receipt scanning</li>
+                    <li>Peer spending comparison</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="auth-panel-right">
+            <div class="auth-form-wrap">
+                <h2 class="auth-form-title">Create account</h2>
+                <p class="auth-form-sub">Get started for free</p>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('signup') }}">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required minlength="3" autocomplete="username">
+                        <small id="username-feedback" class="field-feedback"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-with-toggle">
+                            <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password">
+                            <button type="button" class="toggle-pw" data-target="password">Show</button>
+                        </div>
+                        <div class="strength-bar-wrap">
+                            <div class="strength-bar" id="strength-bar"></div>
+                        </div>
+                        <small id="strength-label" class="field-feedback"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <div class="input-with-toggle">
+                            <input type="password" id="confirm_password" name="confirm_password" required minlength="6" autocomplete="new-password">
+                            <button type="button" class="toggle-pw" data-target="confirm_password">Show</button>
+                        </div>
+                        <small id="match-feedback" class="field-feedback"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="savings_balance">Current Savings Balance (£) <span class="text-light-gray font-weight-400">— optional</span></label>
+                        <input type="number" id="savings_balance" name="savings_balance"
+                               step="0.01" min="0" placeholder="0.00" autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn btn-auth-signup">Sign Up</button>
+                </form>
+
+                <div class="auth-footer">
+                    Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+.table-wrapper {
+    overflow-x: auto;
+    border: 0.1em solid var(--border, #b8c8e8);
+}
+
+.table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.table-wrapper th {
+    background: #eef2fa;
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    border: 0.1em solid var(--border, #b8c8e8);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: navy;
+}
+
+.table-wrapper td {
+    padding: 0.65rem 0.75rem;
+    border: 0.1em solid var(--border, #b8c8e8);
+    font-size: 0.9rem;
+}
+
+.table-wrapper tr:nth-child(even) {
+    background-color: #f7f9fd;
+}
+
+.table-wrapper tr:hover {
+    background-color: #e8f2ff;
+}
+
+.td-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background-color: rgba(0, 31, 91, 0.45);
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 2rem;
+    border: 0.2em solid navy;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.modal-content h2 {
+    font-family: 'Outfit', sans-serif;
+    color: navy;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 0.1em solid #b8c8e8;
+}
+
+.close {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    font-size: 1.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #8a98b8;
+    line-height: 1;
+}
+
+.close:hover {
+    color: navy;
+}

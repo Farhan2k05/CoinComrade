@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Results - Coin Comrade</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">Coin Comrade</div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('spending_page') }}">Dashboard</a>
+            <a href="{{ url_for('add_entry_page') }}">Add Entry</a>
+            <a href="{{ url_for('manage_recurring') }}">Recurring</a>
+            <a href="{{ url_for('transactions_page') }}">Transactions</a>
+            <a href="{{ url_for('predictions_page') }}">Predictions</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="header-bar">
+                <h1>Receipt Results</h1>
+            </div>
+            <p class="text-gray mt-0 mb-15">Review and correct the scanned items below before saving.</p>
+
+            <div id="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">Scanning receipt, please wait...</p>
+            </div>
+
+            <div id="results-area"></div>
+        </div>
+    </div>
+
+    <script>
+        const jobId = "{{ job_id }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/results.js') }}"></script>
+    <script>
+        pollResults(jobId);
+    </script>
+</body>
+</html>

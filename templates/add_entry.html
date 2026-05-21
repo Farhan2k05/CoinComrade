@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Transaction - Coin Comrade</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">Coin Comrade</div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('spending_page') }}">Dashboard</a>
+            <a href="{{ url_for('add_entry_page') }}">Add Entry</a>
+            <a href="{{ url_for('manage_recurring') }}">Recurring</a>
+            <a href="{{ url_for('transactions_page') }}">Transactions</a>
+            <a href="{{ url_for('predictions_page') }}">Predictions</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card card-centered">
+            <div class="header-bar">
+                <h1>Add Transaction</h1>
+            </div>
+
+            <form method="POST">
+                <div class="form-grid">
+
+                    <div>
+                        <label>Type</label>
+                        <select name="type" id="type-select">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Name</label>
+                        <input type="text" name="item_name" placeholder="e.g. Tesco, Salary, Rent" required>
+                    </div>
+
+                    <div>
+                        <label>Amount (£)</label>
+                        <input type="number" step="0.01" min="0.01" name="amount" placeholder="0.00" required>
+                    </div>
+
+                    <div>
+                        <label>Date</label>
+                        <input type="date" name="date" id="date-input" required>
+                    </div>
+
+                    <div id="category-row" class="form-grid-full">
+                        <label>Category</label>
+                        <select name="category">
+                            {% for cat in categories %}
+                            <option value="{{ cat }}">{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-grid-full">
+                        <div class="checkbox-group mt-125">
+                            <input type="checkbox" name="is_recurring" id="recur-check">
+                            <label for="recur-check">Recurring transaction?</label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="recur-options" class="display-none">
+                    <div class="form-grid">
+                        <div>
+                            <label>Frequency</label>
+                            <select name="frequency">
+                                <option value="weekly">Weekly</option>
+                                <option value="biweekly">Fortnightly</option>
+                                <option value="monthly" selected>Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>End Date <small class="text-light-gray font-weight-400">(optional — leave blank to run forever)</small></label>
+                            <input type="date" name="end_date">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Add Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/add_entry.js') }}"></script>
+</body>
+</html>

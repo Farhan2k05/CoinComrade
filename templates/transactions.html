@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions - Coin Comrade</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">Coin Comrade</div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('spending_page') }}">Dashboard</a>
+            <a href="{{ url_for('add_entry_page') }}">Add Entry</a>
+            <a href="{{ url_for('manage_recurring') }}">Recurring</a>
+            <a href="{{ url_for('transactions_page') }}">Transactions</a>
+            <a href="{{ url_for('predictions_page') }}">Predictions</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="page-title">Transaction Search</h1>
+
+        <div class="search-box mb-15">
+            <form method="GET" action="{{ url_for('transactions_page') }}">
+                <div class="search-row">
+                    <div class="search-field">
+                        <label>Search by name</label>
+                        <input type="text" name="q" value="{{ query }}" placeholder="e.g. Tesco, Netflix...">
+                    </div>
+                    <div class="search-field">
+                        <label>Category</label>
+                        <select name="category">
+                            <option value="">All categories</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <label>Month</label>
+                        <input type="month" name="month" value="{{ selected_month }}">
+                    </div>
+                    <div class="search-field search-field-btn">
+                        <label class="income-toggle-label">
+                            <input type="checkbox" id="income-toggle" name="show_income" value="1" {% if show_income %}checked{% endif %}>
+                            Show income
+                        </label>
+                        <button type="submit" class="btn">Search</button>
+                        <a href="{{ url_for('transactions_page') }}" class="btn btn-secondary">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if results %}
+        <p class="transactions-count">{{ results|length }} entr{{ 'ies' if results|length != 1 else 'y' }} found</p>
+        <div class="table-wrapper">
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Source</th>
+                        <th class="text-right">Amount</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in results %}
+                    <tr>
+                        <td>{{ t.date }}</td>
+                        <td>{{ t.name | title }}</td>
+                        <td><span class="tag {% if t.entry_type == 'income' %}tag-income{% endif %}">{{ t.category }}</span></td>
+                        <td class="text-gray">{{ t.source or ('Manual entry' if t.entry_type == 'income' else '—') }}</td>
+                        <td class="text-right {% if t.entry_type == 'income' %}text-green{% endif %}">
+                            {% if t.entry_type == 'income' %}+{% endif %}£{{ "%.2f"|format(t.cost) }}
+                        </td>
+                        <td class="text-center">
+                            {% if t.entry_type != 'income' %}
+                            <form method="POST" action="{{ url_for('delete_transaction') }}" class="inline-delete-form">
+                                <input type="hidden" name="id" value="{{ t.id }}">
+                                <button type="button" class="btn btn-danger btn-xs delete-btn">Delete</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif query or selected_category or selected_month %}
+        <div class="alert">No entries found for your search.</div>
+        {% else %}
+        <div class="alert">Use the filters above to search your transactions.</div>
+        {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/transactions.js') }}"></script>
+</body>
+</html>

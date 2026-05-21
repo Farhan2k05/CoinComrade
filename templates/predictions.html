@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictions - Coin Comrade</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">Coin Comrade</div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('spending_page') }}">Dashboard</a>
+            <a href="{{ url_for('add_entry_page') }}">Add Entry</a>
+            <a href="{{ url_for('manage_recurring') }}">Recurring</a>
+            <a href="{{ url_for('transactions_page') }}">Transactions</a>
+            <a href="{{ url_for('predictions_page') }}">Predictions</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="page-title">Next Month Predictions</h1>
+
+        {% if predictions %}
+        <div class="table-wrapper">
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th class="text-right">Predicted</th>
+                        <th class="text-right">3-Month Average</th>
+                        <th class="text-right">Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in predictions %}
+                    {% set diff = p.predicted - p.rolling_avg %}
+                    <tr>
+                        <td><span class="tag">{{ p.category }}</span></td>
+                        <td class="text-right">£{{ "%.2f"|format(p.predicted) }}</td>
+                        <td class="text-right">£{{ "%.2f"|format(p.rolling_avg) }}</td>
+                        <td class="text-right">
+                            <span class="{% if diff > 2 %}alert-change-up{% elif diff < -2 %}profit-positive{% endif %}">
+                                {% if diff > 2 %}▲{% elif diff < -2 %}▼{% else %}—{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert">Not enough data yet. You need at least 3 months of spending history to generate predictions.</div>
+        {% endif %}
+    </div>
+</body>
+</html>

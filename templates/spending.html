@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Coin Comrade</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">Coin Comrade</div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('spending_page') }}">Dashboard</a>
+            <a href="{{ url_for('add_entry_page') }}">Add Entry</a>
+            <a href="{{ url_for('manage_recurring') }}">Recurring</a>
+            <a href="{{ url_for('transactions_page') }}">Transactions</a>
+            <a href="{{ url_for('predictions_page') }}">Predictions</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="dash-title-bar">
+            <h1>Spending Dashboard</h1>
+            {% if current_month %}
+            <div class="dash-quick-stats">
+                {% if income and income > 0 %}
+                <div class="dash-quick-stat">
+                    <span class="dash-stat-label">Avg Income</span>
+                    <span class="dash-stat-value income-color">£{{ "%.0f"|format(income) }}</span>
+                </div>
+                {% endif %}
+                <div class="dash-quick-stat">
+                    <span class="dash-stat-label">Income</span>
+                    <span class="dash-stat-value income-color">£{{ "%.0f"|format(current_month.income) }}</span>
+                </div>
+                <div class="dash-quick-stat">
+                    <span class="dash-stat-label">Expenses</span>
+                    <span class="dash-stat-value expense-color">£{{ "%.0f"|format(current_month.expense) }}</span>
+                </div>
+                <div class="dash-quick-stat">
+                    <span class="dash-stat-label">Saved</span>
+                    <span class="dash-stat-value {% if savings >= 0 %}profit-positive{% else %}profit-negative{% endif %}">£{{ "%.0f"|format(savings) }}</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="main-dashboard-grid">
+
+            <div class="dash-col-left">
+
+                <div class="budget-section">
+                    <div class="budget-section-header">
+                        <h3>Monthly Budgets</h3>
+                        <a href="{{ url_for('settings') }}#budgets" class="budget-manage-link">Manage</a>
+                    </div>
+                    {% if budget_status %}
+                        {% for b in budget_status %}
+                        <div class="budget-item">
+                            <div class="budget-item-top">
+                                <span class="budget-category">{{ b.category }}</span>
+                                <span class="budget-amounts">
+                                    £{{ "%.2f"|format(b.spent) }} / £{{ "%.2f"|format(b.monthly_limit) }}
+                                    {% if b.over %}<span class="budget-over-label">Over budget</span>
+                                    {% elif b.warning %}<span class="budget-warning-label">Almost at limit</span>
+                                    {% else %}<span class="budget-remaining-label">£{{ "%.2f"|format(b.remaining) }} left</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="budget-bar-wrap">
+                                <div class="budget-bar-fill" data-pct="{{ b.pct }}" data-color="{{ b.bar_color }}"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="budget-empty-text">No budgets set. <a href="{{ url_for('settings') }}">Add in Settings</a>.</p>
+                    {% endif %}
+                </div>
+
+                {% if goal %}
+                <div class="goal-card {% if goal.on_track %}goal-on-track{% else %}goal-off-track{% endif %}">
+                    <div class="goal-header">
+                        <h3>Savings Goal</h3>
+                        <span class="goal-status-badge {% if goal.on_track %}badge-on-track{% else %}badge-off-track{% endif %}">
+                            {{ "On track" if goal.on_track else "Off track" }}
+                        </span>
+                    </div>
+                    <p class="goal-target-line">
+                        Target: <strong>£{{ "%.0f"|format(goal.goal_amount) }}</strong>
+                        by <strong>{{ goal.goal_date_display }}</strong>
+                        &mdash; {{ goal.months_remaining }} month{{ "s" if goal.months_remaining != 1 else "" }} remaining
+                    </p>
+                    <div class="goal-progress-wrap">
+                        <div class="goal-progress-bar">
+                            <div class="goal-progress-fill {% if goal.on_track %}fill-good{% else %}fill-warn{% endif %}" data-pct="{{ goal.progress_pct }}"></div>
+                        </div>
+                        <span class="goal-progress-label">{{ goal.progress_pct }}% saved</span>
+                    </div>
+                    <div class="goal-figures">
+                        <div class="goal-figure-item">
+                            <div class="goal-figure-label">Current Balance</div>
+                            <div class="goal-figure-value">£{{ "%.0f"|format(goal.current_balance) }}</div>
+                        </div>
+                        <div class="goal-figure-item">
+                            <div class="goal-figure-label">Avg Monthly Savings</div>
+                            <div class="goal-figure-value {% if goal.avg_monthly_savings < 0 %}profit-negative{% endif %}">
+                                {% if goal.avg_monthly_savings >= 0 %}+{% endif %}£{{ "%.0f"|format(goal.avg_monthly_savings) }}
+                            </div>
+                        </div>
+                        <div class="goal-figure-item">
+                            <div class="goal-figure-label">Projected at Deadline</div>
+                            <div class="goal-figure-value {% if goal.projected_balance >= goal.goal_amount %}profit-positive{% else %}profit-negative{% endif %}">
+                                £{{ "%.0f"|format(goal.projected_balance) }}
+                            </div>
+                        </div>
+                        {% if goal.monthly_needed %}
+                        <div class="goal-figure-item">
+                            <div class="goal-figure-label">Need Per Month</div>
+                            <div class="goal-figure-value">£{{ "%.0f"|format(goal.monthly_needed) }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if not goal.on_track %}
+                    <div class="goal-shortfall">
+                        Projected to fall <strong>£{{ "%.0f"|format(goal.shortfall) }}</strong> short.
+                        Need <strong>£{{ "%.0f"|format(goal.monthly_needed) }}</strong>/month,
+                        averaging <strong>{% if goal.avg_monthly_savings >= 0 %}+{% endif %}£{{ "%.0f"|format(goal.avg_monthly_savings) }}</strong>/month.
+                    </div>
+                    {% if goal.gap_suggestions %}
+                    <div class="goal-suggestions">
+                        <div class="goal-suggestions-title">Where you could cut:</div>
+                        <ul>
+                            {% for s in goal.gap_suggestions %}
+                            <li><strong>{{ s.category }}</strong>: save <strong>£{{ "%.0f"|format(s.overspend) }}/mo</strong></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="goal-on-track-msg">
+                        On track.{% if goal.shortfall < 0 %} Projected to exceed by £{{ "%.0f"|format(goal.shortfall | abs) }}.{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="goal-card goal-empty">
+                    <p>No savings goal set. <a href="{{ url_for('settings') }}">Add one in Settings</a>.</p>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <div class="dash-col-right">
+
+                <div class="chart-wrapper">
+                    <div class="chart-controls">
+                        <h2>Trends</h2>
+                        <div class="chart-controls-flex">
+                            <select id="trend-selector" onchange="updateChart()">
+                                <option value="overview">Income vs Expenses</option>
+                                <option value="savings">Net Savings</option>
+                                <option value="category">By Category</option>
+                            </select>
+                            <div id="category-selector-wrap" class="display-none">
+                                <select id="category-selector" onchange="updateCategoryChart()">
+                                    <option value="">Select a category...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+
+                {% if trends %}
+                <div class="analysis-box">
+                    <h3>Spending Trends</h3>
+                    <div class="trend-chips-row">
+                        {% for trend in trends %}
+                        <button class="trend-chip {% if trend.direction == 'increasing' %}trend-chip-up{% else %}trend-chip-down{% endif %}"
+                                data-index="{{ loop.index0 }}"
+                                onclick="selectTrend(this)">
+                            <span class="trend-chip-cat">{{ trend.category }}</span>
+                            <span class="trend-chip-badge">
+                                {{ "+" if trend.direction == "increasing" else "-" }}{{ "%.0f"|format(trend.change_percent) }}%
+                            </span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                    <div id="trend-detail-panel" class="trend-detail-panel">
+                        <div class="trend-detail-placeholder">Select a category above to see details and tips.</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="item-alerts-box">
+                    <h3>Repeated Purchases</h3>
+                    {% if item_alerts %}
+                    <p class="item-alerts-subtitle">Items bought more than once this month.</p>
+                    <div class="table-wrapper">
+                        <table class="item-alerts-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-right">×</th>
+                                    <th class="text-right">This Mo.</th>
+                                    <th class="text-right">Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in item_alerts %}
+                                <tr>
+                                    <td>{{ alert.item | title }}</td>
+                                    <td class="text-right">{{ alert.this_count }}</td>
+                                    <td class="text-right">£{{ "%.2f"|format(alert.this_total) }}</td>
+                                    <td class="text-right">
+                                        {% if alert.is_new %}<span class="alert-new-badge">New</span>
+                                        {% else %}<span class="alert-change-up">+£{{ "%.2f"|format(alert.change) }}</span>{% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="item-alerts-empty">
+                        <p class="item-alerts-empty-title">No repeated purchases this month.</p>
+                        <p class="item-alerts-empty-sub">Nothing's been bought more than once yet &mdash; we'll flag patterns as they appear.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+
+        {% if insights or spendable_cats %}
+        <div class="insights-row insights-row--full">
+            <div class="analysis-box">
+                <h3>Peer Comparison</h3>
+                <div class="peer-filter-row">
+                    <div class="peer-chips">
+                        <span class="peer-filter-label">Match on:</span>
+                        {% for cat in spendable_cats %}
+                        <span class="peer-chip {% if cat in match_cats %}peer-chip-active{% endif %}"
+                              data-cat="{{ cat }}">{{ cat }}</span>
+                        {% endfor %}
+                    </div>
+                    <span class="peer-income-toggle {% if match_income %}peer-chip-active{% endif %}"
+                          id="income-toggle">Similar income</span>
+                </div>
+                <ul class="peer-list" id="peer-insights-list"
+                    data-match-cats="{{ match_cats|join(',') }}"
+                    data-match-income="{{ '1' if match_income else '0' }}">
+                    {% for insight in insights %}
+                    <li>{{ insight }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <button class="monthly-toggle-btn" id="monthly-toggle" onclick="toggleMonthly()">
+            <span>Monthly Breakdown</span>
+            <span class="monthly-toggle-icon">▼</span>
+        </button>
+
+        <div id="monthly-breakdown-body" class="display-none">
+            {% if not months %}
+            <div class="alert">No spending data yet.</div>
+            {% else %}
+            <div class="monthly-grid">
+                {% for month in months %}
+                <div class="month-section">
+                    <div class="month-header">
+                        <div>
+                            <h3>{{ month.month_name }}</h3>
+                            <span class="income-badge">Income: £{{ "%.2f"|format(month.income) }}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="total-spent">Spent: £{{ "%.2f"|format(month.expense) }}</span><br>
+                            <small class="{% if month.profit >= 0 %}profit-positive{% else %}profit-negative{% endif %} font-weight-600">
+                                Net: £{{ "%.2f"|format(month.profit) }}
+                            </small>
+                        </div>
+                    </div>
+                    {% if month.categories %}
+                    <div class="table-wrapper">
+                        <table class="transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-right">Amount</th>
+                                    <th class="text-right">% of Income</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cat in month.categories %}
+                                <tr>
+                                    <td><span class="tag">{{ cat.name }}</span></td>
+                                    <td class="text-right">£{{ "%.2f"|format(cat.val) }}</td>
+                                    <td class="text-right">
+                                        {% if month.income > 0 %}{{ "%.1f"|format((cat.val / month.income) * 100) }}%
+                                        {% else %}—{% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="color-gray font-italic">No expense transactions this month.</p>
+                    {% endif %}
+                    {% if month.diff_expense != 0 or month.diff_income != 0 %}
+                    <div class="month-diff">
+                        <strong>vs Previous Month</strong>
+                        <ul>
+                            {% if month.diff_income != 0 %}<li>Income: {% if month.diff_income > 0 %}+{% endif %}£{{ "%.2f"|format(month.diff_income) }}</li>{% endif %}
+                            {% if month.diff_expense != 0 %}<li>Spending: {% if month.diff_expense > 0 %}+{% endif %}£{{ "%.2f"|format(month.diff_expense) }}</li>{% endif %}
+                            {% if month.diff_profit != 0 %}<li>Net Savings: {% if month.diff_profit > 0 %}+{% endif %}£{{ "%.2f"|format(month.diff_profit) }}</li>{% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+    <script id="chart-data" type="text/template">{{ months|tojson }}</script>
+    <script id="trend-data" type="text/template">{{ trends|tojson if trends else '[]' }}</script>
+    <script src="{{ url_for('static', filename='js/spending.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+
+</body>
+</html>

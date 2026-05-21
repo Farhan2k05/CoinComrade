@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Coin Comrade</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">Coin Comrade</div>
+        <div class="nav-links">
+            <span>Hello, {{ current_user.username }}</span>
+            <a href="{{ url_for('spending_page') }}">Dashboard</a>
+            <a href="{{ url_for('add_entry_page') }}">Add Entry</a>
+            <a href="{{ url_for('manage_recurring') }}">Recurring</a>
+            <a href="{{ url_for('transactions_page') }}">Transactions</a>
+            <a href="{{ url_for('predictions_page') }}">Predictions</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>Welcome back, {{ current_user.username }}</h1>
+            <p>Track your budget by scanning receipts or adding entries manually.</p>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        <a href="{{ url_for('spending_page') }}" class="text-decoration-none display-block mb-2">
+            <button class="btn btn-large">View Dashboard</button>
+        </a>
+
+        <div class="action-grid">
+            <div class="card">
+                <h2 class="mt-0">Scan Receipt</h2>
+                <p class="card-description">Upload a photo and we'll extract the items automatically.</p>
+                <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                    <label>Select Image</label>
+                    <input type="file" name="file" accept="image/*" required>
+                    <button type="submit" class="btn">Upload & Scan</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="mt-0">Manage Recurring</h2>
+                <p class="card-description">View and edit your recurring income and expenses.</p>
+                <a href="{{ url_for('manage_recurring') }}" class="text-decoration-none">
+                    <button class="btn-secondary btn mt-1">Manage Recurring</button>
+                </a>
+                <a href="{{ url_for('add_entry_page') }}" class="text-decoration-none">
+                    <button class="btn mt-05">Add Manual Entry</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
